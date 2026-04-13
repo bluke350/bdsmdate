@@ -1,0 +1,30 @@
+{
+  "expo": {
+    "name": "bdsmdate",
+    "slug": "datebdsm",
+    "version": "1.0.0",
+    "sdkVersion": "55.0.0",
+    "platforms": ["ios", "android"],
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "icon": "./assets/playstore-icon.png",
+    "splash": {
+      "image": "./assets/images/cord-allman-OIRkQruBw9U-unsplash.jpg",
+      "resizeMode": "cover",
+      "backgroundColor": "#000000"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2ba34e53-d400-48fc-9890-4d640ee2cec0"
+      }
+    },
+    "android": {
+      "package": "com.bdsmdate.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon-foreground.png",
+        "backgroundColor": "#000000"
+      }
+    }
+  }
+}
