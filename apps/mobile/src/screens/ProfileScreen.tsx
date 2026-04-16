@@ -1,6 +1,8 @@
+import * as ImagePicker from "expo-image-picker";
 import { useEffect, useState } from "react";
-import { Alert, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Image, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { api, Profile, SubscriptionStatus, VerificationStatus } from "../api/client";
+import { getProfileImage } from "../assets/profileImages";
 
 type Props = {
   userId: string;
@@ -34,6 +36,7 @@ export default function ProfileScreen({ userId }: Props) {
   const [aftercareNotes, setAftercareNotes] = useState("");
   const [softLimits, setSoftLimits] = useState<string[]>([]);
   const [limitsNotes, setLimitsNotes] = useState("");
+  const [photoKey, setPhotoKey] = useState("");
   const [subscription, setSubscription] = useState<SubscriptionStatus | null>(null);
   const [boostedUntil, setBoostedUntil] = useState<string | null>(null);
 
@@ -80,6 +83,7 @@ export default function ProfileScreen({ userId }: Props) {
       setAftercareNotes(response.aftercareNotes ?? "");
       setSoftLimits(response.softLimits ?? []);
       setLimitsNotes(response.limitsNotes ?? "");
+      setPhotoKey(response.photoKey ?? "");
       setBoostedUntil(response.boostedUntil ?? null);
     } catch (error) {
       console.error(error);
@@ -147,6 +151,23 @@ export default function ProfileScreen({ userId }: Props) {
     }
   };
 
+  const pickPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Allow access to your photo library to upload a profile picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      setPhotoKey(result.assets[0].uri);
+    }
+  };
+
   const saveProfile = async () => {
     if (!displayName.trim() || !role) {
       Alert.alert("Missing info", "Display name and role are required.");
@@ -174,7 +195,9 @@ export default function ProfileScreen({ userId }: Props) {
         aftercarePreferences,
         aftercareNotes: aftercareNotes.trim() || undefined,
         softLimits,
-        limitsNotes: limitsNotes.trim() || undefined
+        limitsNotes: limitsNotes.trim() || undefined,
+        photoKey: photoKey || undefined,
+        photoKeys: photoKey ? [photoKey] : undefined
       });
       setProfile(updated);
       setEditing(false);
@@ -284,6 +307,15 @@ export default function ProfileScreen({ userId }: Props) {
           <Pressable onPress={() => setEditing((prev) => !prev)}>
             <Text style={styles.link}>{editing ? "Cancel" : "Edit"}</Text>
           </Pressable>
+        </View>
+        <Text style={styles.label}>Profile photo</Text>
+        <View style={styles.photoUploadRow}>
+          <Image source={getProfileImage(photoKey || profile?.photoKey)} style={styles.photoPreview} />
+          {editing && (
+            <Pressable style={styles.uploadButton} onPress={pickPhoto}>
+              <Text style={styles.uploadButtonText}>{photoKey ? "Change photo" : "Upload photo"}</Text>
+            </Pressable>
+          )}
         </View>
         <Text style={styles.label}>Display name</Text>
         {editing ? (
@@ -826,5 +858,29 @@ const styles = StyleSheet.create({
     color: "#fff7f5",
     fontWeight: "600",
     fontSize: 12
+  },
+  photoUploadRow: {
+    alignItems: "center",
+    gap: 10,
+    marginTop: 6,
+    marginBottom: 4
+  },
+  photoPreview: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)"
+  },
+  uploadButton: {
+    backgroundColor: "#7b5146",
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 12
+  },
+  uploadButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 13
   }
 });
