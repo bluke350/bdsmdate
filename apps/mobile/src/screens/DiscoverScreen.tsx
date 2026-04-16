@@ -148,7 +148,7 @@ export default function DiscoverScreen({ userId }: Props) {
     try {
       const response = await api.like(userId, targetId);
       if (response.matched) {
-        Alert.alert("It\"s a match", "You can now message using credits.");
+        Alert.alert("It's a match", "You can now message using credits.");
       }
     } catch (error) {
       console.error(error);

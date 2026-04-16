@@ -58,12 +58,12 @@ export default function ProfileDetailScreen({ route }: Props) {
     try {
       const response = await api.like(viewerId, profileId);
       if (response.matched) {
-        Alert.alert("It" + "s a match", "You can now message using credits.");
+        Alert.alert("It's a match", "You can now message using credits.");
         await AsyncStorage.setItem(activeMatchKey, profileId);
         navigation.navigate("Messages" as never);
         return;
       }
-      Alert.alert("Like sent", "We" + "ll let you know if they match.");
+      Alert.alert("Like sent", "We'll let you know if they match.");
     } catch (error) {
       console.error(error);
       Alert.alert("Like error", "Unable to send like.");
@@ -73,7 +73,7 @@ export default function ProfileDetailScreen({ route }: Props) {
   const sendIcebreaker = async () => {
     try {
       const response = await api.getIcebreakers(viewerId, profileId);
-      const prompt = response.prompts[0] ?? "Hi! I" + "d love to connect.";
+      const prompt = response.prompts[0] ?? "Hi! I'd love to connect.";
       await AsyncStorage.setItem(activeMatchKey, profileId);
       await AsyncStorage.setItem(pendingMessageKey, prompt);
       navigation.navigate("Messages" as never);
