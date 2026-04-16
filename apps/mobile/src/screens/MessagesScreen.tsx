@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -107,7 +107,7 @@ export default function MessagesScreen({ userId }: Props) {
     loadMatches();
   }, [userId, pendingMatchId, selectedId]);
 
-  useFocusEffect(() => {
+  useFocusEffect(useCallback(() => {
     let active = true;
     const readPending = async () => {
       try {
@@ -128,7 +128,7 @@ export default function MessagesScreen({ userId }: Props) {
     return () => {
       active = false;
     };
-  });
+  }, []));
 
   useEffect(() => {
     loadCredits();
