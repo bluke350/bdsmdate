@@ -1,3 +1,4 @@
+import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   Alert,
@@ -12,7 +13,7 @@ import {
   View
 } from "react-native";
 import { api } from "../../api/client";
-import { getProfileImage, profileImageKeys } from "../../assets/profileImages";
+import { getProfileImage } from "../../assets/profileImages";
 
 type Role = "dom" | "sub" | "switch" | "exploring";
 
@@ -27,7 +28,7 @@ export default function ProfileSetupScreen({ userId, role, onComplete }: Props) 
   const [age, setAge] = useState("21");
   const [bio, setBio] = useState("");
   const [intent, setIntent] = useState<"play_only" | "relationship" | "exploring">("exploring");
-  const [photoKey, setPhotoKey] = useState(profileImageKeys[0]);
+  const [photoKey, setPhotoKey] = useState("");
   const [state, setState] = useState("");
   const [zip, setZip] = useState("");
   const [experienceLevel, setExperienceLevel] = useState<"new" | "some" | "experienced">("new");
@@ -49,6 +50,23 @@ export default function ProfileSetupScreen({ userId, role, onComplete }: Props) 
 
   const toggleValue = (value: string, list: string[], setter: (next: string[]) => void) => {
     setter(list.includes(value) ? list.filter((item) => item !== value) : [...list, value]);
+  };
+
+  const pickPhoto = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert("Permission required", "Allow access to your photo library to upload a profile picture.");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.8
+    });
+    if (!result.canceled && result.assets.length > 0) {
+      setPhotoKey(result.assets[0].uri);
+    }
   };
 
   const saveProfile = async () => {
@@ -151,17 +169,18 @@ export default function ProfileSetupScreen({ userId, role, onComplete }: Props) 
               </Pressable>
             ))}
           </View>
-          <Text style={styles.label}>Choose a photo</Text>
-          <View style={styles.photoRow}>
-            {profileImageKeys.map((key) => (
-              <Pressable
-                key={key}
-                style={[styles.photoChip, photoKey === key && styles.photoChipActive]}
-                onPress={() => setPhotoKey(key)}
-              >
-                <Image source={getProfileImage(key)} style={styles.photoImage} />
-              </Pressable>
-            ))}
+          <Text style={styles.label}>Profile photo</Text>
+          <View style={styles.photoUploadRow}>
+            {photoKey ? (
+              <Image source={getProfileImage(photoKey)} style={styles.photoPreview} />
+            ) : (
+              <View style={styles.photoPlaceholder}>
+                <Text style={styles.photoPlaceholderText}>No photo selected</Text>
+              </View>
+            )}
+            <Pressable style={styles.uploadButton} onPress={pickPhoto}>
+              <Text style={styles.uploadButtonText}>{photoKey ? "Change photo" : "Upload photo"}</Text>
+            </Pressable>
           </View>
           <Text style={styles.label}>State</Text>
           <TextInput
@@ -426,23 +445,43 @@ const styles = StyleSheet.create({
     color: "#2b1b12",
     fontWeight: "600"
   },
-  photoRow: {
-    flexDirection: "row",
-    gap: 10,
+  photoUploadRow: {
+    alignItems: "center",
+    gap: 12,
     marginTop: 6
   },
-  photoChip: {
-    borderWidth: 1,
-    borderColor: "#ead9cd",
-    borderRadius: 12,
-    padding: 4
-  },
-  photoChipActive: {
+  photoPreview: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 2,
     borderColor: "#7b5146"
   },
-  photoImage: {
-    width: 64,
-    height: 64,
-    borderRadius: 10
+  photoPlaceholder: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 2,
+    borderColor: "#ead9cd",
+    backgroundColor: "#f5ede8",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  photoPlaceholderText: {
+    fontSize: 10,
+    color: "#9b7060",
+    textAlign: "center",
+    paddingHorizontal: 8
+  },
+  uploadButton: {
+    backgroundColor: "#7b5146",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12
+  },
+  uploadButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14
   }
 });

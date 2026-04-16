@@ -65,18 +65,28 @@ export const profileImageKeys = Object.keys(profileImages);
 
 const fallback = profileImages["pexels-olly-948875.jpg"];
 
-export const getProfileImage = (photoKey?: string) => {
-  if (photoKey && profileImages[photoKey]) {
-    return profileImages[photoKey];
+const isUri = (key: string) => key.startsWith("file://") || key.startsWith("content://") || key.startsWith("https://");
+
+export const getProfileImage = (photoKey?: string): ImageSourcePropType => {
+  if (photoKey) {
+    if (profileImages[photoKey]) {
+      return profileImages[photoKey];
+    }
+    if (isUri(photoKey)) {
+      return { uri: photoKey };
+    }
   }
   return fallback;
 };
 
-export const getProfileImages = (photoKeys?: string[]) => {
+export const getProfileImages = (photoKeys?: string[]): ImageSourcePropType[] => {
   if (photoKeys && photoKeys.length > 0) {
-    return photoKeys
-      .map((key) => profileImages[key])
-      .filter((value): value is ImageSourcePropType => Boolean(value));
+    const results = photoKeys.map((key) => {
+      if (profileImages[key]) return profileImages[key];
+      if (isUri(key)) return { uri: key } as ImageSourcePropType;
+      return null;
+    }).filter((value): value is ImageSourcePropType => Boolean(value));
+    if (results.length > 0) return results;
   }
   return [fallback];
 };
