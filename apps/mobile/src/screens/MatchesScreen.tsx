@@ -12,7 +12,9 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { api, Match, Profile } from "../api/client";
+import { RootStackParamList } from "../navigation/types";
 import { getProfileImage } from "../assets/profileImages";
 
 type Props = {
@@ -20,7 +22,7 @@ type Props = {
 };
 
 export default function MatchesScreen({ userId }: Props) {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const activeMatchKey = "activeMatchId";
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,7 +78,7 @@ export default function MatchesScreen({ userId }: Props) {
             return (
               <Pressable
                 style={styles.card}
-                onPress={() => navigation.navigate("ProfileDetail" as never, { profileId: otherId, viewerId: userId } as never)}
+                onPress={() => navigation.navigate("ProfileDetail", { profileId: otherId, viewerId: userId })}
               >
                 <View style={styles.row}>
                   <Image source={getProfileImage(profiles[otherId]?.photoKey)} style={styles.avatar} />
